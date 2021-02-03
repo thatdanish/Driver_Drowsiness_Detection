@@ -14,7 +14,8 @@ face_det = cv2.CascadeClassifier('haar_cascades/frontal_face_alt.xml') #defining
 left_eye = cv2.CascadeClassifier('haar_cascade/lefteye_2splits.xml')  #defining left eye haar cascade 
 right_eye = cv2.CascadeClassifier('haar_cascade/right_2splits.xml')  #definging right eye haar cascade
 
-cap = cv2.VideoCapture(0)  #loading video from default source (webcam)
+#cap = cv2.VideoCapture(0)  #loading video from default source (webcam)
 
-while(True):
-    pass
+#while(True):
+ #   pass
+print("The Programe has reached till here")
