@@ -9,7 +9,8 @@ This project is a part of junior year curriculum. In this project we aim to real
 - _will be updated soon_  
 
 #### Change Logs:  
-- **model v1.00** : Base model architecture.      
+- **model_det v1.0** : Base model architecture.      
+- **model_det v1.1** : Real-time detection, actions on detection added - Text display,window-border color  
   
  
 **NOTE: This project is still in development phase and some feature might not work as expected.** 

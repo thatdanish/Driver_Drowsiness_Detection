@@ -76,13 +76,3 @@ while(True): #defining main detection loop (always TRUE)
 
 cap.release()
 cap.destroyAllWindows()
-
-
-    
-
-
-
-        
-
- #   pass
-print("The Programe has reached till here")
