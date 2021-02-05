@@ -3,10 +3,13 @@ import keras
 import cv2
 #import numpy as np
 import os
-#import pygame
+from pygame import mixer
 
-model_filepath = os.path.join('models/'+'model_cnn_2.h5')  #defining model path
+model_filepath = os.path.join('model_dir/'+'model_cnn_2.h5')  #defining model path
+sound_path = os.path.join('sounds/2sb.wav')
+mixer.init()
 
+sound = mixer.Sound(sound_path)
 
 model_cnn = keras.models.load_model(model_filepath) #loading model
 
@@ -60,11 +63,14 @@ while(True): #defining main detection loop (always TRUE)
         score -= 1
         cv2.putText(frame,'OPEN',(10,height-20),font,1,(0,0,0),2)
             
-    if score < 0:  #fix: negative score error
-        score = 0
+    if score < 20:  #fix: negative score error and stop alarm
+        sound.stop()
+        if score < 0:
+            score = 0
     if score > 20: #action when driver is considered drowsy 
          cv2.rectangle(frame,(0,0),(width,height),(0,0,255),5)
-         cv2.rectangle(frame,(0,0),(width,height),(255,255,255),5)
+         sound.play() 
+         #cv2.rectangle(frame,(0,0),(width,height),(255,255,255),5)
 
     cv2.putText(frame,"Score:"+str(score),(100,height-20),font,1,(0,0,0),2) 
 
@@ -73,6 +79,5 @@ while(True): #defining main detection loop (always TRUE)
     if cv2.waitKey(1) == 27: #breaking out of the loop
         break
 
-
 cap.release()
-cap.destroyAllWindows()
+cv2.destroyAllWindows()
