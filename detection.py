@@ -3,10 +3,13 @@ import keras
 import cv2
 #import numpy as np
 import os
-#import pygame
+from pygame import mixer
 
-model_filepath = os.path.join('models/'+'model_cnn_2.h5')  #defining model path
+model_filepath = os.path.join('model_dir/'+'model_cnn_2.h5')  #defining model path
+sound_path = os.path.join('sounds/2sb.wav') #defining alarm sound file path
+mixer.init()  
 
+sound = mixer.Sound(sound_path)  #calling mixer instance 
 
 model_cnn = keras.models.load_model(model_filepath) #loading model
 
@@ -15,10 +18,13 @@ l_eye = cv2.CascadeClassifier('haar_cascades/lefteye_2splits.xml')  #defining le
 r_eye = cv2.CascadeClassifier('haar_cascades/righteye_2splits.xml')  #definging right eye haar cascade
 
 cap = cv2.VideoCapture(0)  #loading video from default source (webcam)
-score = 0  #drowsiness score
-pred_lefteye = [99]
-pred_righteye = [99]
+score = 100  #alertness score
+pred_lefteye = [99]     #init value
+pred_righteye = [99]  #init value
+decision_bndr_scr = 65  #decision boundary for sounding the alarm
+thick = 0
 font = cv2.FONT_HERSHEY_COMPLEX_SMALL
+
 # Class Labels: Closed == 0 , Open == 1
 
 while(True): #defining main detection loop (always TRUE)
@@ -31,10 +37,11 @@ while(True): #defining main detection loop (always TRUE)
     leye = l_eye.detectMultiScale(frame_rgb,minNeighbors=2) #detecting right eye from a single frame
     reye = r_eye.detectMultiScale(frame_rgb,minNeighbors=2) #detecting left eye from a single frame
 
-  #  for (x,y,w,h) in face: #draw a rectangle around the frame when a face is detected
+    for (x,y,w,h) in face: #draw a rectangle around the frame when a face is detected
+        cv2.rectangle(frame,(x,y),(x+w,y+h),(100,100,100),1)
        
-        #for (x,y,w,h) in face:
-    cv2.rectangle(frame,(0,0),(width,height),(255,255,255),2)
+       
+    cv2.rectangle(frame,(0,height-35),(300,height-10),(0,0,0),thickness=cv2.FILLED) #for better displaying of text
     for (x,y,h,w) in leye: #extracting left from the frame 
         left_eye =frame[y:y+h,x:x+w]
         left_eye = cv2.resize(left_eye,(128,128))
@@ -54,25 +61,30 @@ while(True): #defining main detection loop (always TRUE)
         break
         
     if (pred_lefteye == 0 and pred_righteye == 0):  #checking the alertness
-        score += 1
-        cv2.putText(frame,'CLOSED',(10,height-20),font,1, (0,0,0),2)
-    else:
         score -= 1
-        cv2.putText(frame,'OPEN',(10,height-20),font,1,(0,0,0),2)
+        cv2.putText(frame,'CLOSED,',(10,height-20),font,0.75, (255,255,255),1)
+    else:
+        score += 1
+        cv2.putText(frame,'OPEN,',(10,height-20),font,0.75,(255,255,255),1)
             
-    if score < 0:  #fix: negative score error
-        score = 0
-    if score > 20: #action when driver is considered drowsy 
-         cv2.rectangle(frame,(0,0),(width,height),(0,0,255),5)
-         cv2.rectangle(frame,(0,0),(width,height),(255,255,255),5)
+    if score > decision_bndr_scr:  #fix: negative score error and stop alarm
+        sound.stop()
+        if score >100:
+            score = 100
+    if score < decision_bndr_scr: #action when driver is considered drowsy 
+        if score < 0:
+            score = 0
+               
+        cv2.rectangle(frame,(0,0),(width,height),(0,0,255),5)
+        sound.play() 
+   
 
-    cv2.putText(frame,"Score:"+str(score),(100,height-20),font,1,(0,0,0),2) 
+    cv2.putText(frame,"Alertness Level:"+str(score)+"%",(100,height-20),font,0.75,(255,255,255),1) 
 
     cv2.imshow('Drowsiness Detection',frame) #displaying
 
     if cv2.waitKey(1) == 27: #breaking out of the loop
         break
 
-
 cap.release()
-cap.destroyAllWindows()
+cv2.destroyAllWindows()
