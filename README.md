@@ -11,7 +11,7 @@ This project is a part of junior year curriculum. In this project we aim to real
 #### Change Logs:  
 - **model_det v1.0** : Base model architecture.      
 - **model_det v1.1** : Real-time detection, actions on detection added - Text display,window-border color.  
-- **model_det v1.2** : Alarm sound, alarm starts beeping after certain time of not paying attention.  
+- **model_det v1.2** : Alarm sound, alarm starts beeping after certain time of not paying attention,detection is displayed better,fix: Alertness level now decreases on drowsiness.  
   
  
 **NOTE: This project is still in development phase and some feature might not work as expected.** 
