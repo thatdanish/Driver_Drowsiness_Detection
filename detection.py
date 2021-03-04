@@ -1,6 +1,8 @@
 import tensorflow as tf 
 import keras
 import cv2
+import time
+import keyboard
 #import numpy as np
 import os
 from pygame import mixer
@@ -19,11 +21,16 @@ r_eye = cv2.CascadeClassifier('haar_cascades/righteye_2splits.xml')  #definging 
 
 cap = cv2.VideoCapture(0)  #loading video from default source (webcam)
 score = 100  #alertness score
+
 pred_lefteye = [99]     #init value
 pred_righteye = [99]  #init value
-decision_bndr_scr = 65  #decision boundary for sounding the alarm
+
+decision_bndr_scr = 75  #decision boundary for sounding the alarm
 thick = 0
 font = cv2.FONT_HERSHEY_COMPLEX_SMALL
+
+prev_frame_time = 0
+new_frame_time = 0
 
 # Class Labels: Closed == 0 , Open == 1
 
@@ -32,6 +39,8 @@ while(True): #defining main detection loop (always TRUE)
     height, width = frame.shape[:2]
 
     frame_rgb = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+    new_frame_time = time.time()
+    
 
     face = face_det.detectMultiScale(frame_rgb,minNeighbors=2,scaleFactor=1.1,minSize=(25,25)) #detecting a full face from a single frame
     leye = l_eye.detectMultiScale(frame_rgb,minNeighbors=2) #detecting right eye from a single frame
@@ -61,7 +70,7 @@ while(True): #defining main detection loop (always TRUE)
         break
         
     if (pred_lefteye == 0 and pred_righteye == 0):  #checking the alertness
-        score -= 1
+        score -= 0.5
         cv2.putText(frame,'CLOSED,',(10,height-20),font,0.75, (255,255,255),1)
     else:
         score += 1
@@ -72,6 +81,7 @@ while(True): #defining main detection loop (always TRUE)
         if score >100:
             score = 100
     if score < decision_bndr_scr: #action when driver is considered drowsy 
+        cv2.putText(frame,'Press ENTER to turn off alarm',(100,50),font,1,(0,0,255),1)
         if score < 0:
             score = 0
                
@@ -81,10 +91,21 @@ while(True): #defining main detection loop (always TRUE)
 
     cv2.putText(frame,"Alertness Level:"+str(score)+"%",(100,height-20),font,0.75,(255,255,255),1) 
 
-    cv2.imshow('Drowsiness Detection',frame) #displaying
+    fps = 1/(new_frame_time-prev_frame_time)  #calculating FPS
+    fps = str(int(fps))
+    prev_frame_time = new_frame_time    
+    cv2.putText(frame,fps,(width-20,15),font,0.65,(0,128,255),1,cv2.LINE_AA)  #displaying FPS in the rightside-up corner
 
-    if cv2.waitKey(1) == 27: #breaking out of the loop
+    cv2.imshow('Drowsiness Detection',frame) #displaying
+    
+    if keyboard.is_pressed('ENTER'):    #score reset key (ENTER)
+        score = 100
+        print('***Score reset called.***')
+
+    if cv2.waitKey(1) == 27:      #doomsday exit key (ESC)
+        print('***Program terminated by the user.***')
         break
+       
 
 cap.release()
 cv2.destroyAllWindows()
