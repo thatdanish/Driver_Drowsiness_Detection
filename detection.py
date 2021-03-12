@@ -25,7 +25,7 @@ score = 100  #alertness score
 pred_lefteye = [99]     #init value
 pred_righteye = [99]  #init value
 
-decision_bndr_scr = 75  #decision boundary for sounding the alarm
+decision_bndr_scr = 98  #decision boundary for sounding the alarm
 thick = 0
 font = cv2.FONT_HERSHEY_COMPLEX_SMALL
 
@@ -70,7 +70,7 @@ while(True): #defining main detection loop (always TRUE)
         break
         
     if (pred_lefteye == 0 and pred_righteye == 0):  #checking the alertness
-        score -= 0.5
+        score -= 1
         cv2.putText(frame,'CLOSED,',(10,height-20),font,0.75, (255,255,255),1)
     else:
         score += 1
